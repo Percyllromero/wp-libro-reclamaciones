@@ -20,6 +20,20 @@ $myUpdateChecker = PucFactory::buildUpdateChecker(
 );
 
 
+/**
+ * Enlazar estilos CSS al plugin
+ */
+function wplr_cargar_estilos() {
+    // Registra y carga el archivo style.css de la carpeta css
+    wp_enqueue_style(
+        'wplr-estilos-globales', 
+        plugins_url( '/css/style.css', __FILE__ ), 
+        array(), 
+        '1.0.0'
+    );
+}
+add_action( 'wp_enqueue_scripts', 'wplr_cargar_estilos' );
+
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
@@ -278,7 +292,7 @@ function lr_render_formulario_oficial() {
             </fieldset>
 
             <p class="lr-legal-notice" style="font-size: 11px; color: #555;">* El proveedor deberá dar respuesta al reclamo en un plazo no mayor a quince (15) días hábiles.</p>
-            <input class="lr-submit-btn" type="submit" name="lr_submit_oficial" value="ENVIAR HOJA DE RECLAMACIÓN" style="width: 100%; padding: 15px; background: #000; color: #fff; border: none; font-weight: bold; cursor: pointer;">
+            <input class="lr-submit-btn" type="submit" name="lr_submit_oficial" value="ENVIAR HOJA DE RECLAMACIÓN">
         </form>
     </div>
     <?php
