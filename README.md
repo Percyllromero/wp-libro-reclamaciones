@@ -1,4 +1,4 @@
-# WP Libro de Reclamaciones - Astec
+# WP Libro de Reclamaciones
 Plugin profesional de WordPress para la gestión de reclamaciones, optimizado para dispositivos móviles y con actualizaciones automáticas vía GitHub.
 
 ## ✨ Características
