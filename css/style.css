@@ -1,12 +1,130 @@
-.lr-submit-btn {
-    background-color: #000000 !important; /* Fuerza el color negro */
-    color: #ffffff !important;           /* Fuerza el texto blanco */
-    width: 100% !important;
-    padding: 15px !important;
-    border: none !important;
-    cursor: pointer !important;
+/* 1. Contenedor Principal y Reset */
+.lr-form-wrapper {
+    width: 100%;
+    max-width: 800px;
+    margin: 20px auto;
+    background: #ffffff;
+    border: 1px solid #cccccc;
+    padding: 25px;
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    box-sizing: border-box;
 }
 
-.lr-submit-btn:hover {
-    background-color: #444444 !important; /* Gris al pasar el mouse */
+.lr-form-wrapper *, 
+.lr-form-wrapper *:before, 
+.lr-form-wrapper *:after {
+    box-sizing: border-box !important;
+}
+
+/* 2. Encabezado */
+.lr-form-wrapper .lr-form-header {
+    text-align: center;
+    border-bottom: 2px solid #333333;
+    margin-bottom: 20px;
+}
+
+.lr-form-wrapper .lr-form-title {
+    margin: 0;
+    color: #7a3518;
+    font-size: 1.8rem;
+}
+
+.lr-form-wrapper .lr-form-subtitle {
+    margin: 10px 0;
+}
+
+/* 3. Estructura de Secciones (Fieldsets) */
+.lr-form-wrapper .lr-form-fieldset {
+    border: 1px solid #dddddd;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+/* Limpiador de floats para que el formulario no se desmorone */
+.lr-form-wrapper .lr-form-fieldset::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+.lr-form-wrapper .lr-form-legend {
+    padding: 0 10px;
+    font-weight: bold;
+}
+
+/* 4. Campos de Entrada e Inputs */
+.lr-form-wrapper .lr-input-field, 
+.lr-form-wrapper .lr-textarea-field {
+    width: 100%;
+    margin-bottom: 15px; 
+    padding: 10px;
+    border: 1px solid #333333;
+    display: block;
+}
+
+/* Alineación horizontal (DNI y Teléfono) */
+.lr-form-wrapper .lr-input-half {
+    float: left; /* Eliminado inline-block para corregir el error de VS Code */
+}
+
+.lr-form-wrapper .lr-dni-width { 
+    width: 48%; 
+    margin-right: 2%; 
+}
+
+.lr-form-wrapper .lr-tel-width { 
+    width: 50%; 
+}
+
+/* Alturas para textareas */
+.lr-form-wrapper .lr-h-60 { height: 60px; }
+.lr-form-wrapper .lr-h-100 { height: 100px; }
+
+/* 5. Radio Buttons y Etiquetas */
+.lr-form-wrapper .lr-label-radio {
+    cursor: pointer;
+    margin-right: 20px;
+}
+
+/* 6. Notas legales y Botón de Envío */
+.lr-form-wrapper .lr-legal-notice {
+    font-size: 11px;
+    color: #555555;
+    margin-bottom: 15px;
+}
+
+.lr-form-wrapper .lr-submit-btn {
+    width: 100%;
+    padding: 15px;
+    background-color: #000000;
+    color: #ffffff;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.lr-form-wrapper .lr-submit-btn:hover {
+    background-color: #444444; /* Color gris oscuro al pasar el mouse */
+}
+
+/* 7. Ajustes para Móviles (Responsive) */
+@media screen and (max-width: 600px) {
+    .lr-form-wrapper {
+        padding: 15px;
+        margin: 10px 0;
+    }
+    .lr-form-wrapper .lr-form-title {
+        font-size: 1.4rem;
+    }
+    .lr-form-wrapper .lr-input-half {
+        width: 100%;
+        float: none;
+        margin-right: 0;
+    }
+    .lr-form-wrapper .lr-submit-btn {
+        padding: 18px;
+        font-size: 16px;
+    }
 }

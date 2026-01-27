@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WP Libro de Reclamaciones
  * Description: Formulario oficial según normativa INDECOPI con registro en DB y avisos legales.
- * Version:     1.1.3
+ * Version:     1.1.4
  * Author:      Percy Ll. Romero
  * License:     GPL2
  */
@@ -23,15 +23,21 @@ $myUpdateChecker = PucFactory::buildUpdateChecker(
 $myUpdateChecker->setBranch('main');
 
 
+/**
+ * Enlazar estilos CSS al plugin con prioridad alta
+ */
 function wplr_cargar_estilos() {
     wp_enqueue_style(
         'wplr-estilos-globales', 
         plugin_dir_url( __FILE__ ) . 'css/style.css', 
         array(), 
-        '1.1.3' // Sube un número para forzar al navegador a leerlo
+        '1.1.4' // Cambia el número de versión cada vez que modifiques el CSS
     );
 }
-add_action( 'wp_enqueue_scripts', 'wplr_cargar_estilos' );
+
+// Agregamos el 20 al final para que cargue DESPUÉS del tema
+add_action( 'wp_enqueue_scripts', 'wplr_cargar_estilos', 20 );
+
 
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -197,108 +203,57 @@ function lr_render_formulario_oficial() {
     $ruc = get_option('lr_ruc_empresa');
     $razon = get_option('lr_razon_social');
     ?>
-    <style>
-        /* 1. Reset de caja para simetría total */
-        .lr-form-wrapper, 
-        .lr-form-wrapper *, 
-        .lr-form-wrapper *:before, 
-        .lr-form-wrapper *:after {
-            box-sizing: border-box !important;
-        }
 
-        .lr-form-wrapper {
-            width: 100%;
-            margin: auto;
-            background: #fff;
-        }
-
-        /* 2. Espaciado vertical para que los campos no estén pegados */
-        .lr-input-field, .lr-textarea-field {
-            width: 100%;
-            margin-bottom: 15px !important; 
-            padding: 10px;
-            border: 1px solid #333;
-            display: block;
-        }
-
-        /* 3. Alineación horizontal en PC (DNI y Teléfono) */
-        .lr-input-half {
-            display: inline-block !important;
-            float: left;
-        }
-
-        /* Limpiador para que los campos flotantes no desarmen el diseño */
-        .lr-form-fieldset::after {
-            content: "";
-            display: table;
-            clear: both;
-        }
-
-        /* 4. Ajustes para móviles */
-        @media screen and (max-width: 600px) {
-            .lr-form-wrapper {
-                padding: 15px !important;
-                margin: 0 !important;
-            }
-            .lr-form-title {
-                font-size: 1.4rem !important;
-            }
-            .lr-input-half {
-                width: 100% !important;
-                float: none !important;
-                margin-right: 0 !important;
-            }
-            .lr-submit-btn {
-                padding: 18px !important;
-                font-size: 16px !important;
-            }
-        }
-    </style>
-
-    <div class="lr-form-wrapper" style="border: 1px solid #ccc; padding: 25px; max-width: 800px; margin: auto; font-family: Arial, sans-serif; line-height: 1.6;">
-        <div class="lr-form-header" style="text-align: center; border-bottom: 2px solid #333; margin-bottom: 20px;">
-            <h2 class="lr-form-title" style="margin: 0; color: #7a3518;">HOJA DE RECLAMACIÓN</h2>
-            <p class="lr-form-subtitle"><strong>Empresa:</strong> <?php echo esc_html($razon); ?> | <strong>RUC:</strong> <?php echo esc_html($ruc); ?></p>
+    <div class="lr-form-wrapper">
+        <div class="lr-form-header">
+            <h2 class="lr-form-title">HOJA DE RECLAMACIÓN</h2>
+            <p class="lr-form-subtitle">
+                <strong>Empresa:</strong> <?php echo esc_html($razon); ?> | 
+                <strong>RUC:</strong> <?php echo esc_html($ruc); ?>
+            </p>
         </div>
 
         <form class="lr-reclamaciones-form" action="" method="post">
-            <fieldset class="lr-form-fieldset" style="border: 1px solid #ddd; padding: 15px; margin-bottom: 20px;">
-                <legend class="lr-form-legend" style="padding: 0 10px;"><strong>1. Identificación del Consumidor</strong></legend>
+            
+            <fieldset class="lr-form-fieldset">
+                <legend class="lr-form-legend">1. Identificación del Consumidor</legend>
                 <input class="lr-input-field" type="text" name="lr_nombre" placeholder="Nombres y Apellidos" required>
                 
-                <input class="lr-input-field lr-input-half" type="text" name="lr_dni" placeholder="DNI / CE" required style="width: 48%; margin-right: 2%;">
-                <input class="lr-input-field lr-input-half" type="text" name="lr_telefono" placeholder="Teléfono" required style="width: 50%;">
+                <input class="lr-input-field lr-input-half lr-dni-width" type="text" name="lr_dni" placeholder="DNI / CE" required>
+                <input class="lr-input-field lr-input-half lr-tel-width" type="text" name="lr_telefono" placeholder="Teléfono" required>
                 
                 <input class="lr-input-field" type="email" name="lr_email_cliente" placeholder="Correo electrónico" required>
                 <input class="lr-input-field" type="text" name="lr_domicilio" placeholder="Dirección / Domicilio" required>
                 <input class="lr-input-field" type="text" name="lr_representante" placeholder="Representante (Si es menor de edad)">
             </fieldset>
 
-            <fieldset class="lr-form-fieldset" style="border: 1px solid #ddd; padding: 15px; margin-bottom: 20px;">
-                <legend class="lr-form-legend" style="padding: 0 10px;"><strong>2. Identificación del Bien Contratado</strong></legend>
+            <fieldset class="lr-form-fieldset">
+                <legend class="lr-form-legend">2. Identificación del Bien Contratado</legend>
                 <label class="lr-label-radio"><input type="radio" name="lr_bien_tipo" value="Producto" checked> Producto</label>
-                <label class="lr-label-radio" style="margin-left: 20px;"><input type="radio" name="lr_bien_tipo" value="Servicio"> Servicio</label><br><br>
+                <label class="lr-label-radio"><input type="radio" name="lr_bien_tipo" value="Servicio"> Servicio</label>
+                <br><br>
                 <input class="lr-input-field" type="text" name="lr_bien_monto" placeholder="Monto Reclamado (S/.)">
-                <textarea class="lr-textarea-field" name="lr_bien_descripcion" placeholder="Descripción del producto o servicio..." style="height: 60px;"></textarea>
+                <textarea class="lr-textarea-field lr-h-60" name="lr_bien_descripcion" placeholder="Descripción del producto o servicio..."></textarea>
             </fieldset>
 
-            <fieldset class="lr-form-fieldset" style="border: 1px solid #ddd; padding: 15px; margin-bottom: 20px;">
-                <legend class="lr-form-legend" style="padding: 0 10px;"><strong>3. Detalle de la Reclamación</strong></legend>
+            <fieldset class="lr-form-fieldset">
+                <legend class="lr-form-legend">3. Detalle de la Reclamación</legend>
                 <label class="lr-label-radio"><input type="radio" name="lr_incidencia" value="Reclamo" checked> Reclamo</label>
-                <label class="lr-label-radio" style="margin-left: 20px;"><input type="radio" name="lr_incidencia" value="Queja"> Queja</label><br><br>
-                <textarea class="lr-textarea-field" name="lr_detalle" placeholder="Detalle lo ocurrido..." required style="height: 100px;"></textarea>
-                <textarea class="lr-textarea-field" name="lr_pedido" placeholder="Pedido (¿Qué es lo que solicita?)" required style="height: 60px;"></textarea>
+                <label class="lr-label-radio"><input type="radio" name="lr_incidencia" value="Queja"> Queja</label>
+                <br><br>
+                <textarea class="lr-textarea-field lr-h-100" name="lr_detalle" placeholder="Detalle lo ocurrido..." required></textarea>
+                <textarea class="lr-textarea-field lr-h-60" name="lr_pedido" placeholder="Pedido (¿Qué es lo que solicita?)" required></textarea>
             </fieldset>
 
-            <p class="lr-legal-notice" style="font-size: 11px; color: #555;">* El proveedor deberá dar respuesta al reclamo en un plazo no mayor a quince (15) días hábiles.</p>
+            <p class="lr-legal-notice">* El proveedor deberá dar respuesta al reclamo en un plazo no mayor a quince (15) días hábiles.</p>
             <input class="lr-submit-btn" type="submit" name="lr_submit_oficial" value="ENVIAR HOJA DE RECLAMACIÓN">
         </form>
     </div>
+
     <?php
     lr_procesar_envio_oficial();
     return ob_get_clean();
 }
-
 
 // --- 5. PROCESAMIENTO CON TODOS LOS CAMPOS ---
 function lr_procesar_envio_oficial() {
