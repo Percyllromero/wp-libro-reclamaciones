@@ -1,18 +1,12 @@
-/* Estilo del botón de envío */
 .lr-submit-btn {
-    width: 100%;
-    padding: 15px;
-    background-color: #000000; /* Color normal (Negro) */
-    color: #ffffff;            /* Color del texto (Blanco) */
-    border: none;
-    font-weight: bold;
-    cursor: pointer;
-    font-size: 16px;
-    font-family: inherit;      /* Hereda la fuente global de la web */
-    transition: background-color 0.3s ease; /* Suaviza el cambio de color */
+    background-color: #000000 !important; /* Fuerza el color negro */
+    color: #ffffff !important;           /* Fuerza el texto blanco */
+    width: 100% !important;
+    padding: 15px !important;
+    border: none !important;
+    cursor: pointer !important;
 }
 
-/* Efecto al pasar el mouse (Hover) */
 .lr-submit-btn:hover {
-    background-color: #333333; /* Gris oscuro al pasar el mouse */
+    background-color: #444444 !important; /* Gris al pasar el mouse */
 }

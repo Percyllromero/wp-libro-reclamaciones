@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WP Libro de Reclamaciones
  * Description: Formulario oficial según normativa INDECOPI con registro en DB y avisos legales.
- * Version:     1.1.2
+ * Version:     1.1.3
  * Author:      Percy Ll. Romero
  * License:     GPL2
  */
@@ -23,16 +23,12 @@ $myUpdateChecker = PucFactory::buildUpdateChecker(
 $myUpdateChecker->setBranch('main');
 
 
-/**
- * Enlazar estilos CSS al plugin
- */
 function wplr_cargar_estilos() {
-    // Registra y carga el archivo style.css de la carpeta css
     wp_enqueue_style(
         'wplr-estilos-globales', 
-        plugins_url( '/css/style.css', __FILE__ ), 
+        plugin_dir_url( __FILE__ ) . 'css/style.css', 
         array(), 
-        '1.1.2'
+        '1.1.3' // Sube un número para forzar al navegador a leerlo
     );
 }
 add_action( 'wp_enqueue_scripts', 'wplr_cargar_estilos' );
