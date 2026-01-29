@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WP Libro de Reclamaciones
  * Description: Formulario oficial según normativa INDECOPI con registro en DB y avisos legales.
- * Version:     1.1.7
+ * Version:     1.1.8
  * Author:      Percy Ll. Romero
  * License:     GPL2
  */
@@ -93,12 +93,13 @@ function lr_generar_interfaz_ajustes() {
 }
 
 /**
- * --- 3. TABLA DE RECLAMACIONES ---
+ * --- 3. TABLA DE RECLAMACIONES Y VISTA DE DETALLE ---
  */
 function lr_mostrar_tabla_reclamaciones() {
     global $wpdb;
     $tabla = $wpdb->prefix . 'reclamaciones';
 
+    // 1. Lógica para procesar la respuesta del administrador 📧
     if ( isset($_POST['lr_enviar_respuesta']) ) {
         $id = intval($_POST['reclamo_id']);
         $respuesta_admin = sanitize_textarea_field($_POST['lr_respuesta_texto']);
@@ -112,38 +113,85 @@ function lr_mostrar_tabla_reclamaciones() {
         $mensaje .= "RESPUESTA:\n$respuesta_admin\n\nGracias por su comunicación.";
         
         wp_mail($email_cliente, $asunto, $mensaje);
-        echo '<div class="updated"><p>¡Reclamo atendido con éxito! ✅</p></div>';
+        echo '<div class="updated"><p>¡Respuesta enviada y reclamo marcado como Atendido! ✅</p></div>';
     }
 
+    // 2. Vista de Detalle del Reclamo 🔍
     if ( isset($_GET['id_reclamo']) ) {
         $id = intval($_GET['id_reclamo']);
         $r = $wpdb->get_row( $wpdb->prepare("SELECT * FROM $tabla WHERE id = %d", $id) );
+
         if ($r) {
-            echo '<div class="wrap"><h1>Detalle: ' . $r->correlativo . '</h1>';
-            echo '<a href="?page=lr_ver_reclamaciones" class="button">⬅ Volver</a><br><br>';
-            echo '<div style="background:white; padding:20px; border:1px solid #ccc; max-width:700px;">';
-            $color_estado = ($r->estado == 'Pendiente') ? 'red' : 'green';
-            echo "<strong>Estado:</strong> <span style='color:$color_estado; font-weight:bold;'>$r->estado</span><hr>";
-            echo "<h3>1. Consumidor</h3><strong>Nombre:</strong> $r->nombre_completo<br><strong>DNI:</strong> $r->dni_ce<br>";
-            echo "<h3>2. Bien</h3><strong>Tipo:</strong> $r->bien_tipo<br><strong>Monto:</strong> S/ $r->bien_monto<br>";
-            echo "<h3>3. Detalle</h3><strong>Tipo:</strong> $r->tipo_incidencia<br><p>$r->detalle</p>";
+            echo '<div class="wrap">';
+            echo '<h1>Detalle del Reclamo: ' . esc_html($r->correlativo) . '</h1>';
+            echo '<a href="?page=lr_ver_reclamaciones" class="button">⬅ Volver al listado</a><br><br>';
+
+            echo '<div id="poststuff"><div class="postbox">';
+            echo '<h2 class="hndle"><span>Información Completa de la Hoja de Reclamación</span></h2>';
+            echo '<div class="inside" style="padding: 20px; line-height: 1.6;">';
+            
+            $color_estado = ($r->estado == 'Pendiente') ? '#d63638' : '#00a32a';
+            echo "<p><strong>Estado Actual:</strong> <span style='color:$color_estado; font-weight:bold; text-transform:uppercase;'>$r->estado</span> | <strong>Fecha:</strong> $r->fecha</p><hr>";
+
+            echo "<h3>👤 1. Identificación del Consumidor</h3>";
+            echo "<strong>Nombre Completo:</strong> " . esc_html($r->nombre_completo) . "<br>";
+            echo "<strong>Documento (DNI/CE):</strong> " . esc_html($r->dni_ce) . "<br>";
+            echo "<strong>Email:</strong> " . esc_html($r->email_cliente) . "<br>";
+            echo "<strong>Teléfono:</strong> " . esc_html($r->telefono) . "<br>";
+            echo "<strong>Domicilio:</strong> " . esc_html($r->domicilio) . "<br>";
+            echo "<strong>Representante:</strong> " . ( !empty($r->representante) ? esc_html($r->representante) : '<span style="color:#999;">N/A</span>' ) . "<br>";
+
+            echo "<h3>📦 2. Identificación del Bien Contratado</h3>";
+            echo "<strong>Tipo:</strong> " . esc_html($r->bien_tipo) . "<br>";
+            echo "<strong>Monto Reclamado:</strong> S/ " . esc_html($r->bien_monto) . "<br>";
+            echo "<strong>Descripción:</strong><p style='background:#f6f7f7; padding:10px; border-radius:4px;'>" . nl2br(esc_html($r->bien_descripcion)) . "</p>";
+
+            echo "<h3>📝 3. Detalle de la Reclamación</h3>";
+            echo "<strong>Tipo de Incidencia:</strong> " . esc_html($r->tipo_incidencia) . "<br>";
+            echo "<strong>Detalle de lo ocurrido:</strong><p style='background:#f6f7f7; padding:10px; border-radius:4px;'>" . nl2br(esc_html($r->detalle)) . "</p>";
+            echo "<strong>Pedido del cliente:</strong><p style='background:#f6f7f7; padding:10px; border-radius:4px;'>" . nl2br(esc_html($r->pedido)) . "</p>";
+
             if ($r->estado == 'Pendiente') {
-                echo '<hr><form method="post" action=""><input type="hidden" name="reclamo_id" value="'.$r->id.'"><input type="hidden" name="lr_email_cliente" value="'.$r->email_cliente.'"><input type="hidden" name="lr_correlativo" value="'.$r->correlativo.'"><textarea name="lr_respuesta_texto" style="width:100%; height:120px;" placeholder="Respuesta..." required></textarea><br><br><input type="submit" name="lr_enviar_respuesta" class="button button-primary" value="Enviar Respuesta ✅"></form>';
+                echo '<hr><h3>📤 Responder al Cliente</h3>';
+                echo '<form method="post" action="">';
+                echo '<input type="hidden" name="reclamo_id" value="'.$r->id.'">';
+                echo '<input type="hidden" name="lr_email_cliente" value="'.$r->email_cliente.'">';
+                echo '<input type="hidden" name="lr_correlativo" value="'.$r->correlativo.'">';
+                echo '<textarea name="lr_respuesta_texto" style="width:100%; height:150px; margin-bottom:15px;" placeholder="Escriba aquí la respuesta oficial para el cliente..." required></textarea>';
+                echo '<input type="submit" name="lr_enviar_respuesta" class="button button-primary button-large" value="Enviar Respuesta y Atender ✅">';
+                echo '</form>';
+            } else {
+                echo '<hr><div style="background:#f0fff0; padding:15px; border-left:4px solid #00a32a; font-weight:bold;">Este reclamo ya ha sido atendido y la respuesta fue enviada al cliente. ✅</div>';
             }
-            echo '</div></div>';
+
+            echo '</div></div></div></div>';
             return; 
         }
     }
 
+    // 3. Listado General 📋
     $resultados = $wpdb->get_results( "SELECT * FROM $tabla ORDER BY fecha DESC" );
-    echo '<div class="wrap"><h1>Reclamaciones 📂</h1><table class="wp-list-table widefat fixed striped"><thead><tr><th>Fecha</th><th>Código</th><th>Cliente</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>';
+    echo '<div class="wrap"><h1>Reclamaciones Recibidas 📂</h1>';
+    echo '<table class="wp-list-table widefat fixed striped">
+            <thead><tr>
+                <th>Fecha</th><th>Código</th><th>Cliente</th><th>Estado</th><th>Acciones</th>
+            </tr></thead><tbody>';
+
     if ($resultados) {
         foreach ($resultados as $f) {
             $url_detalle = admin_url('admin.php?page=lr_ver_reclamaciones&id_reclamo=' . $f->id);
-            $color_txt = ($f->estado == 'Pendiente') ? 'red' : 'green';
-            echo "<tr><td>$f->fecha</td><td><strong>$f->correlativo</strong></td><td>$f->nombre_completo</td><td style='color:$color_txt; font-weight:bold;'>$f->estado</td><td><a href='$url_detalle' class='button button-primary'>Ver Detalles 🔍</a></td></tr>";
+            $color_txt = ($f->estado == 'Pendiente') ? '#d63638' : '#00a32a';
+            echo "<tr>
+                <td>$f->fecha</td>
+                <td><strong>$f->correlativo</strong></td>
+                <td>" . esc_html($f->nombre_completo) . "</td>
+                <td style='color:$color_txt; font-weight:bold;'>$f->estado</td>
+                <td><a href='$url_detalle' class='button button-primary'>Ver Detalles 🔍</a></td>
+            </tr>";
         }
-    } else { echo '<tr><td colspan="5">No hay reclamos.</td></tr>'; }
+    } else { 
+        echo '<tr><td colspan="5">No hay reclamos registrados aún.</td></tr>'; 
+    }
     echo '</tbody></table></div>';
 }
 
