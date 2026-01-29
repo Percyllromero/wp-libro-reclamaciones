@@ -76,8 +76,8 @@ function lr_crear_tabla_oficial() {
 // --- 2. PANEL ADMINISTRATIVO (IGUAL AL ANTERIOR) ---
 add_action( 'admin_menu', 'lr_crear_menu_completo' );
 function lr_crear_menu_completo() {
-    add_menu_page('Libro de Reclamaciones', 'Reclamaciones 📝', 'manage_options', 'lr_ajustes_plugin', 'lr_generar_interfaz_ajustes', 'dashicons-clipboard', 60);
-    add_submenu_page('lr_ajustes_plugin', 'Ver Reclamaciones', 'Ver Reclamaciones 📂', 'manage_options', 'lr_ver_reclamaciones', 'lr_mostrar_tabla_reclamaciones');
+    add_menu_page('Libro de Reclamaciones', 'Reclamaciones', 'manage_options', 'lr_ajustes_plugin', 'lr_generar_interfaz_ajustes', 'dashicons-clipboard', 60);
+    add_submenu_page('lr_ajustes_plugin', 'Ver Reclamaciones', 'Ver Reclamaciones', 'manage_options', 'lr_ver_reclamaciones', 'lr_mostrar_tabla_reclamaciones');
 }
 
 add_action( 'admin_init', 'lr_registrar_ajustes_plugin' );
@@ -246,6 +246,7 @@ function lr_render_formulario_oficial() {
             </fieldset>
 
             <p class="lr-legal-notice">* El proveedor deberá dar respuesta al reclamo en un plazo no mayor a quince (15) días hábiles.</p>
+            <input type="text" name="lr_segundo_apellido" class="lr-campo-oculto" tabindex="-1" autocomplete="off">
             <input class="lr-submit-btn" type="submit" name="lr_submit_oficial" value="ENVIAR HOJA DE RECLAMACIÓN">
         </form>
     </div>
@@ -259,6 +260,13 @@ function lr_render_formulario_oficial() {
 function lr_procesar_envio_oficial() {
     // 1. Bloque de procesamiento (POST)
     if ( isset( $_POST['lr_submit_oficial'] ) ) {
+
+        // --- VALIDACIÓN ANTI-SPAM (HONEYPOT) 🍯 ---
+        // Si este campo (que debería ser invisible para humanos) tiene contenido, detenemos todo.
+        if ( ! empty( $_POST['lr_segundo_apellido'] ) ) {
+            wp_die( 'Error: Actividad sospechosa detectada. 🤖', 'Acceso Denegado' );
+        }
+
         global $wpdb;
         $tabla = $wpdb->prefix . 'reclamaciones';
         $correlativo = 'RE-' . date('Ymd') . '-' . rand(100, 999);

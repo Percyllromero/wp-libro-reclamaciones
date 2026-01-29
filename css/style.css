@@ -128,3 +128,8 @@
         font-size: 16px;
     }
 }
+
+.lr-campo-oculto {
+    display: none !important;
+    visibility: hidden;
+}
