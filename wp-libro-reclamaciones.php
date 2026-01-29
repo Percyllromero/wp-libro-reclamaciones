@@ -219,7 +219,7 @@ add_action( 'template_redirect', 'lr_procesar_envio_datos_oficial' );
 function lr_procesar_envio_datos_oficial() {
     if ( ! isset( $_POST['lr_submit_oficial'] ) ) return;
 
-    // VALIDACIÓN HONEYPOT
+    // VALIDACIÓN HONEYPOT 🍯
     if ( ! empty( $_POST['lr_segundo_apellido'] ) ) {
         wp_die( 'Actividad sospechosa detectada. 🤖' );
     }
@@ -247,12 +247,32 @@ function lr_procesar_envio_datos_oficial() {
 
     $wpdb->insert($tabla, $datos);
 
-    // Enviar correos
-    $cuerpo = "Nuevo reclamo recibido: $correlativo\nCliente: " . $datos['nombre_completo'];
-    wp_mail(get_option('lr_email_destino'), "NUEVO RECLAMO: $correlativo", $cuerpo);
-    wp_mail($datos['email_cliente'], "Copia de su Reclamación: $correlativo", "Hemos recibido su reclamo.\n\n" . $cuerpo);
+    // 1. CONSTRUIR CUERPO DETALLADO PARA EL ADMIN 🏢
+    $cuerpo_admin = "SE HA REGISTRADO UN NUEVO RECLAMO:\n";
+    $cuerpo_admin .= "----------------------------------\n";
+    $cuerpo_admin .= "Código: " . $datos['correlativo'] . "\n";
+    $cuerpo_admin .= "Cliente: " . $datos['nombre_completo'] . "\n";
+    $cuerpo_admin .= "DNI/CE: " . $datos['dni_ce'] . "\n";
+    $cuerpo_admin .= "Email: " . $datos['email_cliente'] . "\n";
+    $cuerpo_admin .= "Teléfono: " . $datos['telefono'] . "\n";
+    $cuerpo_admin .= "Dirección: " . $datos['domicilio'] . "\n";
+    $cuerpo_admin .= "Tipo de Bien: " . $datos['bien_tipo'] . " (S/ " . $datos['bien_monto'] . ")\n";
+    $cuerpo_admin .= "Incidencia: " . $datos['tipo_incidencia'] . "\n";
+    $cuerpo_admin .= "Detalle: " . $datos['detalle'] . "\n";
+    $cuerpo_admin .= "Pedido: " . $datos['pedido'] . "\n";
 
-    // Redirección limpia
+    // 2. CONSTRUIR RESUMEN PARA EL USUARIO ✉️
+    $cuerpo_usuario = "Estimado/a " . $datos['nombre_completo'] . ",\n\n";
+    $cuerpo_usuario .= "Le confirmamos que hemos recibido su " . strtolower($datos['tipo_incidencia']) . " con éxito.\n";
+    $cuerpo_usuario .= "Código de seguimiento: " . $datos['correlativo'] . "\n";
+    $cuerpo_usuario .= "Plazo de respuesta: 15 días hábiles.\n\n";
+    $cuerpo_usuario .= "Gracias por ayudarnos a mejorar.";
+
+    // 3. ENVIAR LOS CORREOS 🚀
+    wp_mail(get_option('lr_email_destino'), "NUEVO RECLAMO: $correlativo", $cuerpo_admin);
+    wp_mail($datos['email_cliente'], "Copia de su Reclamación: $correlativo", $cuerpo_usuario);
+
+    // REDIRECCIÓN LIMPIA
     $url_actual = strtok($_SERVER["REQUEST_URI"], '?'); 
     $url_exito = add_query_arg(array('enviado' => 'exito', 'nro' => $correlativo), home_url($url_actual));
     
